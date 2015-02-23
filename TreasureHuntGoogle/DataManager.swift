@@ -8,6 +8,14 @@
 
 import UIKit
 
+let namePlistHuntZip = "/huntzip.plist"
+let namePlistHunt = "/hunt.plist"
+let namePlistUser = "/user.plist"
+//let urlPath = "http://162.248.167.159:8080/zip/hunt.zip"
+let urlPath = "192.168.1.4:8080/hunt.zip" //per provare attivare il servizio web da Server
+let nameHuntZip = "hunt.zip"
+let nameJSON = "sampleHunt.json"
+
 class DataManager: NSObject {
     
     // MARK: - Singleton
@@ -25,16 +33,6 @@ class DataManager: NSObject {
         }
     }
     //***** FINE CODICE SPECIALE *****\\
-    
-    let namePlistHuntZip = "/huntzip.plist"
-    let namePlistHunt = "/hunt.plist"
-    let namePlistUser = "/user.plist"
-    //let urlPath = "http://162.248.167.159:8080/zip/hunt.zip"
-    let urlPath = "192.168.1.4:8080/hunt.zip" //per provare attivare il servizio web da Server
-    let nameHuntZip = "hunt.zip"
-    let huntUnzippedDestinationFolder = "hunt/"
-    let nameJSON = "sampleHunt.json"
-    
 
     
     // MARK: - variabili globali
@@ -47,9 +45,9 @@ class DataManager: NSObject {
     
     var docPath : String!
     
-    // MARK: - Metodi
+    // MARK: - Menager methods
     func startDataManager() {
-        docPath = cartellaDocuments()
+        docPath = NSFileManager.applicationDocumentsDirectory().path
         //var filePath = docPath! + namePlist
 
         connectParse()
@@ -66,12 +64,27 @@ class DataManager: NSObject {
     
     //SANDBOX
     //restituisce il percorso della cartella documents della sandbox dell'App
-    func cartellaDocuments() -> String {
-        var paths = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)
-        return paths[0] as String
+    func documentsFolderPath() -> String {
+//        var paths = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)
+//        return paths[0] as String
+        return NSFileManager.applicationDocumentsDirectory().path!
     }
     
-    // Parse -
+    func saveFile(dataFile:NSData, name:String) -> Bool{
+        return NSFileManager.saveDataToDocumentsDirectory(dataFile, path: name, subdirectory: nil)
+    }
+    
+    func unzipHuntFile(name:String, destinationInDocumentFolder:String) -> Bool{
+        let zipPath = documentsFolderPath() + name
+        let destinatioFolder = documentsFolderPath() + destinationInDocumentFolder
+        
+        NSFileManager.deleteSubDirectoryFromDocumentsDirectory(destinatioFolder)
+        
+        var isUnzip = SSZipArchive.unzipFileAtPath(zipPath, toDestination: destinatioFolder)
+        return isUnzip
+    }
+    
+    // MARK: - Parse
     
     func loadParseData(){
         user = getCurrentUser()
@@ -86,26 +99,29 @@ class DataManager: NSObject {
         huntZips = getListHunt()
     }
     
+    // MARK: - Hunt methods
+    
     func downloadHuntZip() -> Bool{
-        var isDownloaded : Bool = false
         var dataFile : NSData? = getHuntZipFileById(huntZip!.huntId)
-        if(dataFile != nil){
-            NSFileManager.saveDataToDocumentsDirectory(dataFile!, path: cartellaDocuments(), subdirectory: nil)
-            isDownloaded = unzipFile()
+        if(dataFile == nil){
+            println("No zip downloaded")
+            return false
         }
-        return isDownloaded
+        let isSave = saveFile(dataFile!, name: nameHuntZip)
+        if(!isSave){
+            println("No zip saved")
+            return false
+        }
+        let isUnzipped = unzipHuntFile(nameHuntZip, destinationInDocumentFolder: nameHuntZip.stringByDeletingPathExtension)
+        if(!isUnzipped){
+            println("No zip unzipped")
+            return false
+        }
+        return true
     }
     
-    func unzipFile() -> Bool{
-        let zipPath = cartellaDocuments() + nameHuntZip
-        let destinatioFolder = cartellaDocuments() + huntUnzippedDestinationFolder
+    func createHunt(){
         
-        NSFileManager.deleteSubDirectoryFromDocumentsDirectory(destinatioFolder)
-        
-        var isUnzip = SSZipArchive.unzipFileAtPath(zipPath, toDestination: destinatioFolder)
-        return isUnzip
     }
-    
-    
 }
 
