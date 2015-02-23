@@ -31,6 +31,11 @@ class ListHuntZipViewController : UIViewController, UITableViewDelegate, UITable
         }
         self.tableView.delegate = self
         self.tableView.dataSource = self
+        
+        var ptr = UIRefreshControl()
+        ptr.addTarget(self, action: "refresh", forControlEvents: .ValueChanged)
+        //ptr.attributedTitle = NSAttributedString(string: "Refreshing", attributes: [NSFontAttributeName : UIFont(name: "Gill Sans", size: 12.0)])
+        self.tableView.addSubview(ptr)
     }
     
     func displayAlert(title:String, error:String) {
