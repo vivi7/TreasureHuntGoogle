@@ -82,7 +82,7 @@ class ConnectUserViewController: UIViewController, UINavigationControllerDelegat
                         // Hooray! Let them use the app now.
                         println("signed up")
                         self.segue = true
-                        DataManager.sharedInstance.loadParseData()
+                        DataManager.sharedInstance.newUserOperation()
                     } else {
                         if let errorString = signupError.userInfo?["error"] as? NSString {
                             error = errorString
@@ -102,7 +102,7 @@ class ConnectUserViewController: UIViewController, UINavigationControllerDelegat
                     if signupError == nil {
                         println("logged in")
                         self.segue = true
-                        DataManager.sharedInstance.loadParseData()
+                        DataManager.sharedInstance.newUserOperation()
                     } else {
                         if let errorString = signupError.userInfo?["error"] as? NSString {
                             error = errorString

@@ -8,7 +8,6 @@
 
 import UIKit
 
-let namePlistHuntZip = "/huntzip.plist"
 let namePlistHunt = "/hunt.plist"
 let namePlistUser = "/user.plist"
 //let urlPath = "http://162.248.167.159:8080/zip/hunt.zip"
@@ -53,10 +52,18 @@ class DataManager: NSObject {
             println(documentsFolderPath() + namePlistUser + " exist, retrive user")
             user = NSKeyedUnarchiver.unarchiveObjectWithFile(documentsFolderPath() + namePlistUser) as? User
         }
+        if NSFileManager.defaultManager().fileExistsAtPath(documentsFolderPath() + namePlistHunt) {
+            println(documentsFolderPath() + namePlistUser + " exist, retrive hunt")
+            hunt = NSKeyedUnarchiver.unarchiveObjectWithFile(documentsFolderPath() + namePlistHunt) as? Hunt
+        }
     }
     
-    func salvaUser() {
+    func saveUser() {
         NSKeyedArchiver.archiveRootObject(user!, toFile: documentsFolderPath() + namePlistUser)
+    }
+    
+    func saveHunt() {
+        NSKeyedArchiver.archiveRootObject(hunt!, toFile: documentsFolderPath() + namePlistHunt)
     }
     
     //SANDBOX
@@ -67,8 +74,8 @@ class DataManager: NSObject {
         return NSFileManager.applicationDocumentsDirectory().path!
     }
     
-    func deleteSubDirectoryInDocumentFolder(destinationInDocumentFolder:String) -> Bool{
-        return NSFileManager.deleteSubDirectoryFromDocumentsDirectory(destinationInDocumentFolder)
+    func deleteInDocumentFolder(subdirectoryOrFileName:String) -> Bool{
+        return NSFileManager.deleteFromDocumentsDirectory(subdirectoryOrFileName)
     }
     
     func saveFile(dataFile:NSData, name:String) -> Bool{
@@ -81,12 +88,6 @@ class DataManager: NSObject {
     
     // MARK: - Parse
     
-    func newUserOperation(){
-        user = getCurrentUser()
-        
-        huntZips = getListHunt()
-    }
-    
     func loadCurrentUser(){
         user = getCurrentUser()
     }
@@ -96,6 +97,20 @@ class DataManager: NSObject {
     }
     
     // MARK: - Hunt methods
+    
+    func newUserOperation(){
+        if NSFileManager.defaultManager().fileExistsAtPath(documentsFolderPath() + namePlistUser) {
+            deleteInDocumentFolder(namePlistUser)
+        }
+        if NSFileManager.defaultManager().fileExistsAtPath(documentsFolderPath() + namePlistHunt) {
+            deleteInDocumentFolder(namePlistHunt)
+        }
+        loadCurrentUser()
+        saveUser()
+        loadHuntZips()
+        
+        downloadHuntZip()
+    }
     
     func downloadHuntZip() -> Bool{
         var dataFile : NSData? = getHuntZipFileById(huntZip!.huntId)
@@ -112,7 +127,7 @@ class DataManager: NSObject {
         let zipPath = documentsFolderPath() + nameHuntZip
         let destinatioFolder = documentsFolderPath() + nameHuntZip.stringByDeletingPathExtension
         
-        let hasDeleteFolder = deleteSubDirectoryInDocumentFolder(destinatioFolder)
+        let hasDeleteFolder = deleteInDocumentFolder(destinatioFolder)
         if(hasDeleteFolder){
             println("Folder " + destinatioFolder + " exist and deleted")
         }

@@ -136,9 +136,9 @@ extension NSFileManager {
         return success;
     }
     
-    class func deleteSubDirectoryFromDocumentsDirectory(subdirectory:String) -> Bool{
+    class func deleteFromDocumentsDirectory(subdirectoryOrFileName:String) -> Bool{
         // Remove unnecessary slash if need
-        var newSubdirectory:String? = self.stripSlashIfNeeded(subdirectory)
+        var newSubdirectory:String? = self.stripSlashIfNeeded(subdirectoryOrFileName)
         
         // Create generic beginning to file delete path
         var deletePath = self.applicationDocumentsDirectory().path!+"/"
