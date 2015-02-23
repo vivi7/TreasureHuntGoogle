@@ -43,23 +43,20 @@ class DataManager: NSObject {
     
     //var mainController : MasterViewController!
     
-    var docPath : String!
-    
     // MARK: - Menager methods
     func startDataManager() {
-        docPath = NSFileManager.applicationDocumentsDirectory().path
         //var filePath = docPath! + namePlist
 
         connectParse()
         
-        if NSFileManager.defaultManager().fileExistsAtPath(docPath! + namePlistUser) {
-            user = NSKeyedUnarchiver.unarchiveObjectWithFile(docPath! + namePlistUser) as? User
-            salvaUser()
+        if NSFileManager.defaultManager().fileExistsAtPath(documentsFolderPath() + namePlistUser) {
+            println(documentsFolderPath() + namePlistUser + " exist, retrive user")
+            user = NSKeyedUnarchiver.unarchiveObjectWithFile(documentsFolderPath() + namePlistUser) as? User
         }
     }
     
     func salvaUser() {
-        NSKeyedArchiver.archiveRootObject(user!, toFile: docPath! + namePlistUser)
+        NSKeyedArchiver.archiveRootObject(user!, toFile: documentsFolderPath() + namePlistUser)
     }
     
     //SANDBOX
@@ -70,24 +67,23 @@ class DataManager: NSObject {
         return NSFileManager.applicationDocumentsDirectory().path!
     }
     
+    func deleteSubDirectoryInDocumentFolder(destinationInDocumentFolder:String) -> Bool{
+        return NSFileManager.deleteSubDirectoryFromDocumentsDirectory(destinationInDocumentFolder)
+    }
+    
     func saveFile(dataFile:NSData, name:String) -> Bool{
         return NSFileManager.saveDataToDocumentsDirectory(dataFile, path: name, subdirectory: nil)
     }
     
-    func unzipHuntFile(name:String, destinationInDocumentFolder:String) -> Bool{
-        let zipPath = documentsFolderPath() + name
-        let destinatioFolder = documentsFolderPath() + destinationInDocumentFolder
-        
-        NSFileManager.deleteSubDirectoryFromDocumentsDirectory(destinatioFolder)
-        
-        var isUnzip = SSZipArchive.unzipFileAtPath(zipPath, toDestination: destinatioFolder)
-        return isUnzip
+    func unzipFile(zipPath:String, destinatioFolder:String) -> Bool{
+        return SSZipArchive.unzipFileAtPath(zipPath, toDestination: destinatioFolder)
     }
     
     // MARK: - Parse
     
-    func loadParseData(){
+    func newUserOperation(){
         user = getCurrentUser()
+        
         huntZips = getListHunt()
     }
     
@@ -112,7 +108,16 @@ class DataManager: NSObject {
             println("No zip saved")
             return false
         }
-        let isUnzipped = unzipHuntFile(nameHuntZip, destinationInDocumentFolder: nameHuntZip.stringByDeletingPathExtension)
+        
+        let zipPath = documentsFolderPath() + nameHuntZip
+        let destinatioFolder = documentsFolderPath() + nameHuntZip.stringByDeletingPathExtension
+        
+        let hasDeleteFolder = deleteSubDirectoryInDocumentFolder(destinatioFolder)
+        if(hasDeleteFolder){
+            println("Folder " + destinatioFolder + " exist and deleted")
+        }
+        
+        let isUnzipped = unzipFile(zipPath, destinatioFolder: destinatioFolder)
         if(!isUnzipped){
             println("No zip unzipped")
             return false
