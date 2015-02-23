@@ -8,14 +8,46 @@
 
 import UIKit
 
+let goToGoogleSignInViewControllerSegue = "goToGoogleSignInViewControllerSegue"
+let goToConnectUserControllerSegue = "goToConnectUserControllerSegue"
+let goToClueControllerSegue = "goToClueControllerSegue"
+let goToListHuntZipsControllerSegue = "goToListHuntZipsControllerSegue"
+let goToListCluesControllerSegue = "goToListCluesControllerSegue"
+
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
-
+    //for google+ auth to call finishedWithAuth after autentication
+    func application(application: UIApplication, openURL url: NSURL, sourceApplication: String, annotation: AnyObject?) -> Bool {
+        return GPPURLHandler.handleURL(url, sourceApplication: sourceApplication, annotation: annotation)
+    }
+    
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
-        // Override point for customization after application launch.
+        DataManager.sharedInstance.startDataManager()
+        
+        let storyboard:UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
+        let navigationController:UINavigationController = storyboard.instantiateInitialViewController() as UINavigationController
+        
+        //
+        let huntZipsViewController:UIViewController = storyboard.instantiateViewControllerWithIdentifier("VC") as UIViewController
+        
+        //
+        let ConnectViewController:UIViewController = storyboard.instantiateViewControllerWithIdentifier("ConnectUserViewController") as UIViewController
+        
+        
+//        navigationController.viewControllers = [rootViewController]
+//        self.window?.rootViewController = navigationController
+//        
+//        self.window?.rootViewController.presentViewController(, animated: true, completion: nil)       
+        
+            
+        if DataManager.sharedInstance.user != nil{
+            //call connectUserController
+        } else {
+            //call navigationControllerController
+        }
         return true
     }
 
